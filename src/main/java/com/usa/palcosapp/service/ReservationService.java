@@ -1,10 +1,17 @@
 package com.usa.palcosapp.service;
 
+import com.usa.palcosapp.model.ClientReport;
 import com.usa.palcosapp.model.Reservation;
+import com.usa.palcosapp.model.ReservationReport;
 import com.usa.palcosapp.repository.ReservationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -64,4 +71,34 @@ public class ReservationService {
         }).orElse(false);
         return aBoolean;
     }
-}
+
+    public ReservationReport getReservationReport(){
+        List<Reservation> completed = reservationRepository.getReservationByStatus("completed");
+        List<Reservation> cancelled = reservationRepository.getReservationByStatus("cancelled");
+        return new ReservationReport(completed.size(),cancelled.size());
+    }
+
+    public List<Reservation> getReservationPeriod(String dateA, String dateB){
+        SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd");
+        Date aDate = new Date();
+        Date bDate = new Date();
+
+        try {
+            aDate = parser.parse(dateA);
+            bDate = parser.parse(dateB);
+        }catch(ParseException evt){
+            evt.printStackTrace();
+        }
+        if(aDate.before(bDate)){
+            return reservationRepository.getReservationPeriod(aDate, bDate);
+        }else{
+            return new ArrayList<>();
+        }
+    }
+
+    public List<ClientReport> getTopClients(){
+        return reservationRepository.getTopClient();
+    }
+    //public ReservationReport reservationReportgetReservationStatusReport(){
+       // List<Reservation> getReservationReportDates(@PathVariable("dateOne") Date dateOne, @PathVariable("dateTwo") Date dateTwo)//
+    }
